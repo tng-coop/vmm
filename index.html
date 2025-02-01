@@ -4,14 +4,100 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Virtual Museum of Math</title>
+  <!-- Global museum theme stylesheet -->
+  <link rel="stylesheet" href="museum-theme.css">
+  <style>
+    /* If you want to include some basic styling here */
+    body {
+      margin: 0;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(to right, #f9f9f9, #e0e0e0);
+      color: #333;
+    }
+    header, footer {
+      background: #222;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    nav.museum-nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+    }
+    nav.museum-nav ul li {
+      margin: 0 15px;
+    }
+    nav.museum-nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    main {
+      padding: 20px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    nav.demo-nav {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    nav.demo-nav button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .demo { display: none; }
+    .demo.active { display: block; }
+  </style>
 </head>
 <body>
-  <!-- Other content of your museum -->
-
-  <!-- Include the web component script -->
-  <script src="z-group-demo.js"></script>
-
-  <!-- Use the custom element -->
-  <z-group-demo></z-group-demo>
+  <header>
+    <h1>Virtual Museum of Math</h1>
+    <nav class="museum-nav">
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/exhibits.html">Exhibits</a></li>
+        <li><a href="/about.html">About</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <!-- Navigation to select which demo to view -->
+    <nav class="demo-nav">
+      <button onclick="showDemo('z')">Z Group Demo</button>
+      <button onclick="showDemo('even')">Even Numbers Demo</button>
+    </nav>
+    
+    <!-- Custom elements -->
+    <div id="z-demo" class="demo active">
+      <z-group-demo></z-group-demo>
+    </div>
+    <div id="even-demo" class="demo">
+      <even-group-demo></even-group-demo>
+    </div>
+  </main>
+  <footer>
+    <p>© 2025 Virtual Museum of Math</p>
+  </footer>
+  
+  <!-- Include the web component scripts as modules if needed -->
+  <script type="module" src="z-group-demo.js"></script>
+  <script type="module" src="even-group-demo.js"></script>
+  
+  <script>
+    function showDemo(type) {
+      document.getElementById('z-demo').classList.remove('active');
+      document.getElementById('even-demo').classList.remove('active');
+      if (type === 'z') {
+        document.getElementById('z-demo').classList.add('active');
+      } else if (type === 'even') {
+        document.getElementById('even-demo').classList.add('active');
+      }
+    }
+  </script>
 </body>
 </html>
