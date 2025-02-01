@@ -1,0 +1,23 @@
+# Node modules (if using Node)
+node_modules/
+
+# Build output directories (if any)
+dist/
+build/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Environment variable files
+.env
+
+# VS Code settings
+.vscode/
+
+# Temporary files
+*.tmp
+*.temp
