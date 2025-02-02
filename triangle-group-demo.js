@@ -21,7 +21,7 @@ class TriangleGroupDemo extends HTMLElement {
       // Reset the transform attribute to the identity (no rotation, no scale).
       group.setAttribute("transform", "rotate(0) scale(1)");
     }
-    // Also remove any counter-rotation on the vertex labels.
+    // Remove any counter-rotation from the vertex labels.
     const labels = this.shadowRoot.querySelectorAll('.vertex-label');
     labels.forEach(label => label.removeAttribute('transform'));
   }
@@ -72,7 +72,7 @@ class TriangleGroupDemo extends HTMLElement {
     requestAnimationFrame(step);
   }
   
-  // Existing method for the other buttons (r², f, r·f, etc.)
+  // Existing method for the other buttons (f, r·f, r²·f, etc.)
   applyTransformation(transformStr) {
     const group = this.shadowRoot.getElementById("triangle-group");
     if (group) {
@@ -183,14 +183,18 @@ class TriangleGroupDemo extends HTMLElement {
           @pointercancel="${() => this.lowerTriangle()}">
           1 (Identity)
         </button>
-        <!-- Updated r button: pointerdown resets, pointerup animates rotation -->
+        <!-- r button: pointerdown resets, pointerup animates rotation of 120° in 500ms -->
         <button 
           @pointerdown="${() => this.resetTriangle()}"
-          @pointerup="${() => this.animateRotation(120)}"
-          @pointercancel="${() => this.animateRotation(120)}">
+          @pointerup="${() => this.animateRotation(120, 500)}"
+          @pointercancel="${() => this.animateRotation(120, 500)}">
           r (Rotate 120°)
         </button>
-        <button @click="${() => this.applyTransformation('rotate(240)')}">
+        <!-- r² button: pointerdown resets, pointerup animates rotation of 240° in 1000ms -->
+        <button 
+          @pointerdown="${() => this.resetTriangle()}"
+          @pointerup="${() => this.animateRotation(240, 1000)}"
+          @pointercancel="${() => this.animateRotation(240, 1000)}">
           r² (Rotate 240°)
         </button>
         <button @click="${() => this.applyTransformation('scale(-1,1)')}">
