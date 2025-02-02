@@ -21,6 +21,9 @@ class TriangleGroupDemo extends HTMLElement {
       // Reset the transform attribute to the identity (no rotation, no scale).
       group.setAttribute("transform", "rotate(0) scale(1)");
     }
+    // Also remove any counter-rotation on the vertex labels.
+    const labels = this.shadowRoot.querySelectorAll('.vertex-label');
+    labels.forEach(label => label.removeAttribute('transform'));
   }
   
   /**
@@ -47,12 +50,23 @@ class TriangleGroupDemo extends HTMLElement {
       // Linear interpolation between initialAngle and targetAngle.
       const currentAngle = initialAngle + progress * (targetAngle - initialAngle);
       
-      // Apply the current rotation.
+      // Apply the current rotation to the whole group.
       group.setAttribute("transform", `rotate(${currentAngle})`);
       
       // Continue the animation until progress reaches 1.
       if (progress < 1) {
         requestAnimationFrame(step);
+      } else {
+        // Animation complete.
+        // For each vertex label, apply a counter rotation so that it remains upright.
+        const labels = this.shadowRoot.querySelectorAll('.vertex-label');
+        labels.forEach(label => {
+          // Get the label’s own x and y coordinates.
+          const x = label.getAttribute("x");
+          const y = label.getAttribute("y");
+          // Rotate the label by the negative of the final angle about its (x,y) center.
+          label.setAttribute("transform", `rotate(-${targetAngle}, ${x}, ${y})`);
+        });
       }
     };
     requestAnimationFrame(step);
@@ -155,10 +169,10 @@ class TriangleGroupDemo extends HTMLElement {
           <polygon points="0,-100 86.6,50 -86.6,50" fill="#007BFF" stroke="#0056b3" stroke-width="3"></polygon>
           <!-- Embed the cat-icon in the center of the triangle -->
           <text x="0" y="10" font-size="36" text-anchor="middle" fill="white">🐱</text>
-          <!-- Vertex labels positioned inside the triangle -->
-          <text x="0" y="-60" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">1</text>
-          <text x="50" y="30" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">2</text>
-          <text x="-50" y="30" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">3</text>
+          <!-- Vertex labels positioned inside the triangle (added class "vertex-label") -->
+          <text class="vertex-label" x="0" y="-60" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">1</text>
+          <text class="vertex-label" x="50" y="30" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">2</text>
+          <text class="vertex-label" x="-50" y="30" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">3</text>
         </g>
       </svg>
       <div class="buttons">
