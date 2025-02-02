@@ -53,8 +53,8 @@ class TriangleGroupDemo extends HTMLElement {
   }
   
   render() {
-    // Adjusted label positions so they appear inside the triangle.
-    // Here, the labels "1", "2", and "3" are positioned at (0,-40), (40,20), and (-40,20) respectively.
+    // The cat icon is embedded in the middle of the triangle.
+    // The triangle's centroid is (0,0) so we position a foreignObject with x="-40", y="-40" and size 80x80.
     const template = html`
       <style>
         :host {
@@ -71,7 +71,6 @@ class TriangleGroupDemo extends HTMLElement {
         svg {
           display: block;
           margin: 0 auto;
-          /* Removed background and border */
         }
         .buttons {
           text-align: center;
@@ -106,11 +105,13 @@ class TriangleGroupDemo extends HTMLElement {
         </math>
       </p>
       <svg id="triangle-svg" width="300" height="300" viewBox="-150 -150 300 300">
-        <!-- Group containing the triangle and its vertex labels -->
+        <!-- Group containing the triangle, embedded cat icon, and vertex labels -->
         <g id="triangle-group">
           <!-- Equilateral triangle with vertices at (0,-100), (86.6,50), and (-86.6,50) -->
           <polygon points="0,-100 86.6,50 -86.6,50" fill="#007BFF" stroke="#0056b3" stroke-width="3"></polygon>
-          <!-- Labels positioned inside the triangle -->
+          <!-- Embed the cat-icon in the center of the triangle using a foreignObject -->
+          <text x="0" y="10" font-size="36" text-anchor="middle" fill="white">🐱</text>
+          <!-- Vertex labels positioned inside the triangle -->
           <text x="0" y="-60" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">1</text>
           <text x="50" y="30" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">2</text>
           <text x="-50" y="30" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">3</text>
