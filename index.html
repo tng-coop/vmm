@@ -7,7 +7,7 @@
   <!-- Global museum theme stylesheet -->
   <link rel="stylesheet" href="museum-theme.css">
   <style>
-    /* If you want to include some basic styling here */
+    /* Basic styling */
     body {
       margin: 0;
       font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -50,8 +50,12 @@
       font-size: 16px;
       cursor: pointer;
     }
-    .demo { display: none; }
-    .demo.active { display: block; }
+    .demo { 
+      display: none; 
+    }
+    .demo.active { 
+      display: block; 
+    }
   </style>
 </head>
 <body>
@@ -84,9 +88,9 @@
     <p>© 2025 Virtual Museum of Math</p>
   </footer>
   
-  <!-- Include the web component scripts as modules if needed -->
-  <script type="module" src="z-group-demo.js"></script>
-  <script type="module" src="even-group-demo.js"></script>
+  <!-- Include the bundled web component scripts -->
+  <script type="module" src="dist/z-group-demo.js"></script>
+  <script type="module" src="dist/even-group-demo.js"></script>
   
   <script>
     function showDemo(type) {

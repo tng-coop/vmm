@@ -1,9 +1,93 @@
+import { html, render } from 'lit';
+
 class EvenGroupDemo extends HTMLElement {
   constructor() {
     super();
     // Attach shadow DOM for encapsulation
     this.attachShadow({ mode: 'open' });
-    this.shadowRoot.innerHTML = `
+  }
+  
+  connectedCallback() {
+    // Render the template into the shadow root
+    this.render();
+    
+    // Helper function to check if a number is even
+    const isEven = n => n % 2 === 0;
+  
+    // Closure: For any two even numbers a and b, a + b is even.
+    this.shadowRoot.getElementById('check-closure').addEventListener('click', () => {
+      const a = parseInt(this.shadowRoot.getElementById('closure-a').value, 10);
+      const b = parseInt(this.shadowRoot.getElementById('closure-b').value, 10);
+      const resultDiv = this.shadowRoot.getElementById('closure-result');
+      if (isNaN(a) || isNaN(b)) {
+        resultDiv.textContent = "Please enter valid integers for a and b.";
+        return;
+      }
+      if (!isEven(a) || !isEven(b)) {
+        resultDiv.textContent = "Both a and b must be even numbers.";
+        return;
+      }
+      const sum = a + b;
+      resultDiv.textContent = `Result: ${a} + ${b} = ${sum}. Closure holds because the sum is even.`;
+    });
+  
+    // Identity: For any even number a, a + 0 = a.
+    this.shadowRoot.getElementById('check-identity').addEventListener('click', () => {
+      const a = parseInt(this.shadowRoot.getElementById('identity-a').value, 10);
+      const resultDiv = this.shadowRoot.getElementById('identity-result');
+      if (isNaN(a)) {
+        resultDiv.textContent = "Please enter a valid integer for a.";
+        return;
+      }
+      if (!isEven(a)) {
+        resultDiv.textContent = "Please enter an even number for a.";
+        return;
+      }
+      const result = a + 0;
+      resultDiv.textContent = `Result: ${a} + 0 = ${result}. The identity element is 0, which is even.`;
+    });
+  
+    // Associativity: For any three even numbers a, b, and c, (a + b) + c = a + (b + c).
+    this.shadowRoot.getElementById('check-associativity').addEventListener('click', () => {
+      const a = parseInt(this.shadowRoot.getElementById('assoc-a').value, 10);
+      const b = parseInt(this.shadowRoot.getElementById('assoc-b').value, 10);
+      const c = parseInt(this.shadowRoot.getElementById('assoc-c').value, 10);
+      const resultDiv = this.shadowRoot.getElementById('associativity-result');
+      if (isNaN(a) || isNaN(b) || isNaN(c)) {
+        resultDiv.textContent = "Please enter valid integers for a, b, and c.";
+        return;
+      }
+      if (!isEven(a) || !isEven(b) || !isEven(c)) {
+        resultDiv.textContent = "All of a, b, and c must be even numbers.";
+        return;
+      }
+      const left = (a + b) + c;
+      const right = a + (b + c);
+      let message = `Result: ( ${a} + ${b} ) + ${c} = ${left} and ${a} + ( ${b} + ${c} ) = ${right}. `;
+      message += (left === right) ? "Associativity holds." : "Associativity does not hold!";
+      resultDiv.textContent = message;
+    });
+  
+    // Inverse: For any even number a, there exists an inverse (–a) such that a + (–a) = 0.
+    this.shadowRoot.getElementById('check-inverse').addEventListener('click', () => {
+      const a = parseInt(this.shadowRoot.getElementById('inverse-a').value, 10);
+      const resultDiv = this.shadowRoot.getElementById('inverse-result');
+      if (isNaN(a)) {
+        resultDiv.textContent = "Please enter a valid integer for a.";
+        return;
+      }
+      if (!isEven(a)) {
+        resultDiv.textContent = "Please enter an even number for a.";
+        return;
+      }
+      const inverse = -a;
+      const sum = a + inverse;
+      resultDiv.textContent = `Result: ${a} + (${inverse}) = ${sum}. Every even number a has an inverse (-a) such that a + (-a) = 0.`;
+    });
+  }
+  
+  render() {
+    const template = html`
       <style>
         :host {
           display: block;
@@ -100,83 +184,8 @@ class EvenGroupDemo extends HTMLElement {
         <div id="inverse-result"></div>
       </section>
     `;
-  }
-  
-  connectedCallback() {
-    // Helper function to check if a number is even
-    const isEven = n => n % 2 === 0;
-  
-    // Closure: For any two even numbers a and b, a + b is even.
-    this.shadowRoot.getElementById('check-closure').addEventListener('click', () => {
-      const a = parseInt(this.shadowRoot.getElementById('closure-a').value, 10);
-      const b = parseInt(this.shadowRoot.getElementById('closure-b').value, 10);
-      const resultDiv = this.shadowRoot.getElementById('closure-result');
-      if (isNaN(a) || isNaN(b)) {
-        resultDiv.textContent = "Please enter valid integers for a and b.";
-        return;
-      }
-      if (!isEven(a) || !isEven(b)) {
-        resultDiv.textContent = "Both a and b must be even numbers.";
-        return;
-      }
-      const sum = a + b;
-      resultDiv.textContent = `Result: ${a} + ${b} = ${sum}. Closure holds because the sum is even.`;
-    });
-  
-    // Identity: For any even number a, a + 0 = a.
-    this.shadowRoot.getElementById('check-identity').addEventListener('click', () => {
-      const a = parseInt(this.shadowRoot.getElementById('identity-a').value, 10);
-      const resultDiv = this.shadowRoot.getElementById('identity-result');
-      if (isNaN(a)) {
-        resultDiv.textContent = "Please enter a valid integer for a.";
-        return;
-      }
-      if (!isEven(a)) {
-        resultDiv.textContent = "Please enter an even number for a.";
-        return;
-      }
-      const result = a + 0;
-      resultDiv.textContent = `Result: ${a} + 0 = ${result}. The identity element is 0, which is even.`;
-    });
-  
-    // Associativity: For any three even numbers a, b, and c, (a + b) + c = a + (b + c).
-    this.shadowRoot.getElementById('check-associativity').addEventListener('click', () => {
-      const a = parseInt(this.shadowRoot.getElementById('assoc-a').value, 10);
-      const b = parseInt(this.shadowRoot.getElementById('assoc-b').value, 10);
-      const c = parseInt(this.shadowRoot.getElementById('assoc-c').value, 10);
-      const resultDiv = this.shadowRoot.getElementById('associativity-result');
-      if (isNaN(a) || isNaN(b) || isNaN(c)) {
-        resultDiv.textContent = "Please enter valid integers for a, b, and c.";
-        return;
-      }
-      if (!isEven(a) || !isEven(b) || !isEven(c)) {
-        resultDiv.textContent = "All of a, b, and c must be even numbers.";
-        return;
-      }
-      const left = (a + b) + c;
-      const right = a + (b + c);
-      let message = `Result: ( ${a} + ${b} ) + ${c} = ${left} and ${a} + ( ${b} + ${c} ) = ${right}. `;
-      message += (left === right) ? "Associativity holds." : "Associativity does not hold!";
-      resultDiv.textContent = message;
-    });
-  
-    // Inverse: For any even number a, there exists an inverse (–a) such that a + (–a) = 0.
-    this.shadowRoot.getElementById('check-inverse').addEventListener('click', () => {
-      const a = parseInt(this.shadowRoot.getElementById('inverse-a').value, 10);
-      const resultDiv = this.shadowRoot.getElementById('inverse-result');
-      if (isNaN(a)) {
-        resultDiv.textContent = "Please enter a valid integer for a.";
-        return;
-      }
-      if (!isEven(a)) {
-        resultDiv.textContent = "Please enter an even number for a.";
-        return;
-      }
-      const inverse = -a;
-      const sum = a + inverse;
-      resultDiv.textContent = `Result: ${a} + (${inverse}) = ${sum}. Every even number a has an inverse (-a) such that a + (-a) = 0.`;
-    });
+    render(template, this.shadowRoot);
   }
 }
-  
+
 customElements.define('even-group-demo', EvenGroupDemo);
