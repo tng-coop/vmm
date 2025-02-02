@@ -1,0 +1,43 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # change this if your default branch is named differently
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      # Set up Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      # Install dependencies
+      - name: Install Dependencies
+        run: npm install
+
+      # Build the project (this will run rollup as configured in package.json)
+      - name: Build Project
+        run: npm run build
+
+      # Prepare the public folder with index.html and the dist folder
+      - name: Prepare Deployment Files
+        run: |
+          mkdir public
+          cp index.html public/
+          cp -R dist public/
+
+      # Deploy the content of the public folder to the gh-pages branch
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
