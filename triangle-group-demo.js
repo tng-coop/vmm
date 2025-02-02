@@ -263,7 +263,7 @@ class TriangleGroupDemo extends HTMLElement {
       const inv = inverseD3(a);
       const prod = composeD3(a, inv);
       this.shadowRoot.getElementById('inverse-result-prop').innerHTML =
-        `Result: <math><mrow>${displayD3(a)}<mo>&#x22C5;</mo><mo>(</mo><mo>&#x2212;</mo>${displayD3(a)}<mo>)</mo><mo>=</mo><mi>1</mi></mrow></math> (since ${displayD3(a)} · (${displayD3(inv)}) = ${displayD3(prod)}). Inverse holds.`;
+        `Result: <math><mrow>${displayD3(a)}<mo>&#x22C5;</mo>${displayD3(inv)}<mo>=</mo><mi>1</mi></mrow></math>  Inverse holds.`;
     });
   }
   
