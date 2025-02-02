@@ -53,14 +53,24 @@ class ZGroupDemo extends HTMLElement {
       <h1>Z Group Demonstration</h1>
       <p>
         This demonstration shows the group properties of the set of integers 
-        (<math xmlns="http://www.w3.org/1998/Math/MathML">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
           <mi>&#x2124;</mi>
-        </math>) under addition.
+        </math>
+        under addition.
       </p>
       
       <section id="closure">
         <h2>Closure</h2>
-        <p>Enter two integers to demonstrate closure: a + b is an integer.</p>
+        <p>
+          Enter two integers to demonstrate closure:
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <mi>a</mi>
+            <mo>+</mo>
+            <mi>b</mi>
+            <mo>=</mo>
+            <mi>&#x2124;</mi>
+          </math>
+        </p>
         <label for="closure-a">a:</label>
         <input id="closure-a" type="number" step="1">
         <label for="closure-b">b:</label>
@@ -71,7 +81,16 @@ class ZGroupDemo extends HTMLElement {
       
       <section id="identity">
         <h2>Identity</h2>
-        <p>Enter an integer to demonstrate the identity element (0): a + 0 = a.</p>
+        <p>
+          Enter an integer to demonstrate the identity element:
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <mi>a</mi>
+            <mo>+</mo>
+            <mn>0</mn>
+            <mo>=</mo>
+            <mi>a</mi>
+          </math>
+        </p>
         <label for="identity-a">a:</label>
         <input id="identity-a" type="number" step="1">
         <button id="check-identity">Check Identity</button>
@@ -80,7 +99,26 @@ class ZGroupDemo extends HTMLElement {
       
       <section id="associativity">
         <h2>Associativity</h2>
-        <p>Enter three integers to demonstrate associativity: (a + b) + c = a + (b + c).</p>
+        <p>
+          Enter three integers to demonstrate associativity:
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <mo>(</mo>
+            <mi>a</mi>
+            <mo>+</mo>
+            <mi>b</mi>
+            <mo>)</mo>
+            <mo>+</mo>
+            <mi>c</mi>
+            <mo>=</mo>
+            <mi>a</mi>
+            <mo>+</mo>
+            <mo>(</mo>
+            <mi>b</mi>
+            <mo>+</mo>
+            <mi>c</mi>
+            <mo>)</mo>
+          </math>
+        </p>
         <label for="assoc-a">a:</label>
         <input id="assoc-a" type="number" step="1">
         <label for="assoc-b">b:</label>
@@ -93,7 +131,21 @@ class ZGroupDemo extends HTMLElement {
       
       <section id="inverse">
         <h2>Inverse</h2>
-        <p>Enter an integer to demonstrate the inverse property: a + (–a) = 0.</p>
+        <p>
+          Enter an integer to demonstrate the inverse property:
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <mi>a</mi>
+            <mo>+</mo>
+            <mrow>
+              <mo>(</mo>
+              <mo>&#x2212;</mo>
+              <mi>a</mi>
+              <mo>)</mo>
+            </mrow>
+            <mo>=</mo>
+            <mn>0</mn>
+          </math>
+        </p>
         <label for="inverse-a">a:</label>
         <input id="inverse-a" type="number" step="1">
         <button id="check-inverse">Check Inverse</button>
@@ -155,5 +207,5 @@ class ZGroupDemo extends HTMLElement {
     });
   }
 }
-  
+
 customElements.define('z-group-demo', ZGroupDemo);
