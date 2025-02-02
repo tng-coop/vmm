@@ -111,9 +111,9 @@ class TriangleGroupDemo extends HTMLElement {
           <!-- Equilateral triangle with vertices at (0,-100), (86.6,50), and (-86.6,50) -->
           <polygon points="0,-100 86.6,50 -86.6,50" fill="#007BFF" stroke="#0056b3" stroke-width="3"></polygon>
           <!-- Labels positioned inside the triangle -->
-          <text x="0" y="-40" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">1</text>
-          <text x="40" y="20" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">2</text>
-          <text x="-40" y="20" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">3</text>
+          <text x="0" y="-60" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">1</text>
+          <text x="50" y="30" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">2</text>
+          <text x="-50" y="30" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">3</text>
         </g>
       </svg>
       <div class="buttons">

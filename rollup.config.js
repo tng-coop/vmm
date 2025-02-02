@@ -5,7 +5,7 @@ import { terser } from 'rollup-plugin-terser';
 export default {
   // Use multiple entry points if you want separate bundles, or an array for a multi‑entry bundle.
   // Here, we bundle both modules into the output folder.
-  input: ['even-group-demo.js', 'z-group-demo.js', 'triangle-group-demo.js'],
+  input: ['even-group-demo.js', 'z-group-demo.js', 'triangle-group-demo.js', 'cat-icon.js'],
   output: {
     // Output files will be placed in the dist folder.
     dir: 'dist',
