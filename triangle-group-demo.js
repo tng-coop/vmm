@@ -23,24 +23,44 @@ const elementToObj = {
 function composeD3(a, b) {
   const A = elementToObj[a];
   const B = elementToObj[b];
-  // The multiplication law: (k₁, d₁)·(k₂, d₂) = (k₁ + (-1)^(d₁)*k₂ mod 3, d₁+d₂ mod 2)
+  // Multiplication: (k₁, d₁)·(k₂, d₂) = (k₁ + (-1)^(d₁)*k₂ mod 3, d₁+d₂ mod 2)
   let k = A.k + (A.d === 0 ? B.k : -B.k);
-  k = ((k % 3) + 3) % 3; // ensure nonnegative mod 3
+  k = ((k % 3) + 3) % 3;
   const d = (A.d + B.d) % 2;
-  // Find the corresponding element string.
   for (let key in elementToObj) {
     const val = elementToObj[key];
     if (val.k === k && val.d === d) return key;
   }
-  return null; // should not happen
+  return null;
 }
 
 function inverseD3(a) {
-  // Find b such that a * b = 1.
   for (let candidate in elementToObj) {
     if (composeD3(a, candidate) === "1") return candidate;
   }
   return null;
+}
+
+/**
+ * Convert a D₃ element (as a string) to a MathML representation.
+ */
+function displayD3(elem) {
+  switch (elem) {
+    case "1":
+      return "<mi>1</mi>";
+    case "r":
+      return "<mi>r</mi>";
+    case "r2":
+      return "<msup><mi>r</mi><mn>2</mn></msup>";
+    case "f":
+      return "<mi>f</mi>";
+    case "rf":
+      return "<mrow><mi>r</mi><mo>&#x22C5;</mo><mi>f</mi></mrow>";
+    case "r2f":
+      return "<mrow><msup><mi>r</mi><mn>2</mn></msup><mo>&#x22C5;</mo><mi>f</mi></mrow>";
+    default:
+      return `<mi>${elem}</mi>`;
+  }
 }
 
 // --- The TriangleGroupDemo Component ---
@@ -53,7 +73,7 @@ class TriangleGroupDemo extends HTMLElement {
   
   connectedCallback() {
     this.render();
-    // Set up the interactive group property demonstrations.
+    // Set up interactive group property demonstrations.
     this.setupInteractive();
   }
   
@@ -87,7 +107,6 @@ class TriangleGroupDemo extends HTMLElement {
       if (progress < 1) {
         requestAnimationFrame(step);
       } else {
-        // Counter-rotate the vertex labels.
         const labels = this.shadowRoot.querySelectorAll('.vertex-label');
         labels.forEach(label => {
           const x = label.getAttribute("x");
@@ -136,7 +155,6 @@ class TriangleGroupDemo extends HTMLElement {
   animateFlipThenRotation(targetAngle, flipDuration = 500, rotationDuration = 500) {
     const group = this.shadowRoot.getElementById("triangle-group");
     if (!group) return;
-    // Phase 1: Flip
     let startTimeFlip = null;
     const stepFlip = (timestamp) => {
       if (!startTimeFlip) startTimeFlip = timestamp;
@@ -147,7 +165,6 @@ class TriangleGroupDemo extends HTMLElement {
       if (progress < 1) {
         requestAnimationFrame(stepFlip);
       } else {
-        // Counter the flip on vertex labels.
         const labels = this.shadowRoot.querySelectorAll('.vertex-label');
         labels.forEach(label => {
           const x = label.getAttribute("x");
@@ -210,7 +227,8 @@ class TriangleGroupDemo extends HTMLElement {
   }
   
   /**
-   * Set up the interactive sections for the group properties.
+   * Set up the interactive sections for the D₃ group properties.
+   * Results are inserted as MathML using innerHTML.
    */
   setupInteractive() {
     // Closure
@@ -218,15 +236,15 @@ class TriangleGroupDemo extends HTMLElement {
       const a = this.shadowRoot.getElementById('closure-a').value;
       const b = this.shadowRoot.getElementById('closure-b').value;
       const product = composeD3(a, b);
-      this.shadowRoot.getElementById('closure-result').textContent =
-        `Result: ${a} · ${b} = ${product}. Closure holds because the result is in D₃.`;
+      this.shadowRoot.getElementById('closure-result').innerHTML =
+        `Result: <math><mrow>${displayD3(a)}<mo>&#x22C5;</mo>${displayD3(b)}<mo>=</mo>${displayD3(product)}</mrow></math>. Closure holds because the result is in D₃.`;
     });
-    // Identity: show that 1 · a = a.
+    // Identity property: 1 · a = a.
     this.shadowRoot.getElementById('check-identity-prop').addEventListener('click', () => {
       const a = this.shadowRoot.getElementById('identity-element').value;
       const product = composeD3("1", a);
-      this.shadowRoot.getElementById('identity-result-prop').textContent =
-        `Result: 1 · ${a} = ${product}. The identity element is 1.`;
+      this.shadowRoot.getElementById('identity-result-prop').innerHTML =
+        `Result: <math><mrow>${displayD3("1")}<mo>&#x22C5;</mo>${displayD3(a)}<mo>=</mo>${displayD3(product)}</mrow></math>. The identity element is 1.`;
     });
     // Associativity: (a · b) · c = a · (b · c)
     this.shadowRoot.getElementById('check-associativity-prop').addEventListener('click', () => {
@@ -235,17 +253,17 @@ class TriangleGroupDemo extends HTMLElement {
       const c = this.shadowRoot.getElementById('assoc-c').value;
       const left = composeD3(composeD3(a, b), c);
       const right = composeD3(a, composeD3(b, c));
-      let msg = `Result: ( ${a} · ${b} ) · ${c} = ${left} and ${a} · ( ${b} · ${c} ) = ${right}. `;
+      let msg = `Result: <math><mrow>( ${displayD3(a)}<mo>&#x22C5;</mo>${displayD3(b)} )<mo>&#x22C5;</mo>${displayD3(c)}<mo>=</mo>${displayD3(left)}</mrow></math> and <math><mrow>${displayD3(a)}<mo>&#x22C5;</mo>( ${displayD3(b)}<mo>&#x22C5;</mo>${displayD3(c)} )<mo>=</mo>${displayD3(right)}</mrow></math>. `;
       msg += (left === right) ? "Associativity holds." : "Associativity fails!";
-      this.shadowRoot.getElementById('associativity-result-prop').textContent = msg;
+      this.shadowRoot.getElementById('associativity-result-prop').innerHTML = msg;
     });
-    // Inverse: For a, find a⁻¹ so that a · a⁻¹ = 1.
+    // Inverse: a · a⁻¹ = 1.
     this.shadowRoot.getElementById('check-inverse-prop').addEventListener('click', () => {
       const a = this.shadowRoot.getElementById('inverse-element').value;
       const inv = inverseD3(a);
       const prod = composeD3(a, inv);
-      this.shadowRoot.getElementById('inverse-result-prop').textContent =
-        `Result: ${a} · (${inv}) = ${prod}. Inverse holds.`;
+      this.shadowRoot.getElementById('inverse-result-prop').innerHTML =
+        `Result: <math><mrow>${displayD3(a)}<mo>&#x22C5;</mo><mo>(</mo><mo>&#x2212;</mo>${displayD3(a)}<mo>)</mo><mo>=</mo><mi>1</mi></mrow></math> (since ${displayD3(a)} · (${displayD3(inv)}) = ${displayD3(prod)}). Inverse holds.`;
     });
   }
   
@@ -318,7 +336,7 @@ class TriangleGroupDemo extends HTMLElement {
       </style>
       <h1>Triangle Group Demonstration (Dihedral Group D₃)</h1>
       
-      <!-- The animated triangle and its transformation buttons -->
+      <!-- Animated triangle with transformation buttons -->
       <svg id="triangle-svg" width="300" height="300" viewBox="-150 -150 300 300">
         <g id="triangle-group">
           <polygon points="0,-100 86.6,50 -86.6,50" fill="#007BFF" stroke="#0056b3" stroke-width="3"></polygon>
@@ -363,7 +381,7 @@ class TriangleGroupDemo extends HTMLElement {
         </button>
       </div>
       
-      <!-- Interactive group property sections -->
+      <!-- Interactive sections for group properties -->
       <div class="interactive">
         <section id="closure">
           <h2>Closure</h2>
