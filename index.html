@@ -1,116 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Virtual Museum of Math</title>
-  <!-- Global museum theme stylesheet -->
-  <link rel="stylesheet" href="museum-theme.css">
-  <style>
-    /* Basic styling */
-    body {
-      margin: 0;
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(to right, #f9f9f9, #e0e0e0);
-      color: #333;
-    }
-    header, footer {
-      background: #222;
-      color: #fff;
-      padding: 20px;
-      text-align: center;
-    }
-    nav.museum-nav ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-    }
-    nav.museum-nav ul li {
-      margin: 0 15px;
-    }
-    nav.museum-nav ul li a {
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    main {
-      padding: 20px;
-      max-width: 960px;
-      margin: 0 auto;
-    }
-    nav.demo-nav {
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    nav.demo-nav button {
-      margin: 0 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .demo { 
-      display: none; 
-    }
-    .demo.active { 
-      display: block; 
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Virtual Museum of Math</h1>
-    <nav class="museum-nav">
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/exhibits.html">Exhibits</a></li>
-        <li><a href="/about.html">About</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main>
-    <!-- Navigation to select which demo to view -->
-    <nav class="demo-nav">
-      <button onclick="showDemo('z')">Z Group Demo</button>
-      <button onclick="showDemo('even')">Even Numbers Demo</button>
-      <button onclick="showDemo('triangle')">Triangle Group Demo</button>
-    </nav>
-    
-    <!-- Custom elements -->
-    <div id="z-demo" class="demo active">
-      <z-group-demo></z-group-demo>
-
-    </div>
-    <div id="even-demo" class="demo">
-      <even-group-demo></even-group-demo>
-    </div>
-    <div id="triangle-demo" class="demo">
-      <triangle-group-demo></triangle-group-demo>
-    </div>
-  </main>
-  <footer>
-    <p>© 2025 Virtual Museum of Math</p>
-  </footer>
-  
-  <!-- Include the bundled web component scripts -->
-  <script type="module" src="dist/z-group-demo.js"></script>
-  <script type="module" src="dist/even-group-demo.js"></script>
-  <script type="module" src="dist/triangle-group-demo.js"></script>
-  
-  <script>
-    function showDemo(type) {
-      document.getElementById('z-demo').classList.remove('active');
-      document.getElementById('even-demo').classList.remove('active');
-      document.getElementById('triangle-demo').classList.remove('active');
-      if (type === 'z') {
-        document.getElementById('z-demo').classList.add('active');
-      } else if (type === 'even') {
-        document.getElementById('even-demo').classList.add('active');
-      } else if (type === 'triangle') {
-        document.getElementById('triangle-demo').classList.add('active');
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Museum of Math – Redesigned with Conditional Demo Area</title>
+    <!-- Import Lion UI components via ES modules -->
+    <script type="module">
+      import '@lion/ui/define/lion-button.js';
+    </script>
+    <style>
+      /* CSS Custom Properties for theming */
+      :root {
+        --primary-color: #007bff;
+        --primary-dark: #0056b3;
+        --header-bg: #222;
+        --header-text: #fff;
+        --body-bg: #f9f9f9;
+        --hero-bg: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
       }
-    }
-  </script>
-</body>
+      /* Global Styles */
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        background: var(--body-bg);
+        color: #333;
+        line-height: 1.6;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      /* Header and Navigation */
+      header {
+        background: var(--header-bg);
+        color: var(--header-text);
+        padding: 1rem;
+        position: relative;
+      }
+      .site-title {
+        margin: 0;
+        text-align: center;
+        font-size: 2rem;
+      }
+      nav.navbar {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 1rem;
+      }
+      .menu-item {
+        position: relative;
+        display: inline-block;
+      }
+      /* Main menu buttons (using lion-button) */
+      .menu-item lion-button {
+        background: transparent;
+        color: var(--header-text);
+        border: 1px solid var(--header-text);
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .menu-item lion-button:hover {
+        background: var(--primary-dark);
+      }
+      /* Dropdown styling */
+      .dropdown {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        left: 0;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        display: none;
+        min-width: 180px;
+        z-index: 100;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+      .dropdown lion-button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #eee;
+        padding: 0.5rem 1rem;
+        color: #333;
+      }
+      .dropdown lion-button:last-child {
+        border-bottom: none;
+      }
+      .dropdown lion-button:hover {
+        background: var(--primary-color);
+        color: #fff;
+      }
+      /* Demo Area Container (hidden by default) */
+      #demo-container {
+        display: none;
+        margin: 1rem auto;
+        padding: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #fff;
+        min-height: 300px;
+      }
+      /* Hero Section */
+      .hero {
+        background: var(--hero-bg);
+        color: #fff;
+        text-align: center;
+        padding: 4rem 1rem;
+      }
+      .hero h2 {
+        margin: 0 0 1rem;
+        font-size: 2.5rem;
+      }
+      .hero p {
+        font-size: 1.25rem;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+      /* Main Content */
+      main {
+        max-width: 960px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      .section {
+        margin-bottom: 2rem;
+      }
+      .section h3 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+      }
+      .section p {
+        font-size: 1rem;
+      }
+      /* Footer */
+      footer {
+        background: var(--header-bg);
+        color: var(--header-text);
+        text-align: center;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header with Navigation Menu -->
+    <header>
+      <h1 class="site-title">Virtual Museum of Math</h1>
+      <nav class="navbar" aria-label="Main Navigation">
+        <!-- Home button -->
+        <div class="menu-item">
+          <lion-button onclick="showHome()">Home</lion-button>
+        </div>
+        <div class="menu-item">
+          <lion-button id="group-btn">Group Theory</lion-button>
+          <div class="dropdown" id="group-dropdown">
+            <lion-button onclick="showDemo('z')">Z Group Demo</lion-button>
+            <lion-button onclick="showDemo('even')">Even Numbers Demo</lion-button>
+            <lion-button onclick="showDemo('triangle')">Triangle Group Demo</lion-button>
+          </div>
+        </div>
+        <div class="menu-item">
+          <lion-button id="web-btn">Web Programming</lion-button>
+          <div class="dropdown" id="web-dropdown">
+            <lion-button onclick="showDemo('web1')">Demo 1</lion-button>
+            <lion-button onclick="showDemo('web2')">Demo 2</lion-button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Demo Container: immediately below header (hidden by default) -->
+    <div id="demo-container"></div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home-section">
+      <h2>Discover the Beauty of Mathematics</h2>
+      <p>
+        Welcome to the Virtual Museum of Math—a digital space where theory meets art, and each demo tells a story about the magic of numbers.
+      </p>
+    </section>
+
+    <!-- Main Content Area -->
+    <main>
+      <section class="section" id="exhibits">
+        <h3>Exhibits</h3>
+        <p>
+          Explore interactive demonstrations of group theory, even number groups, and more. Our exhibits are designed to make complex mathematical concepts accessible and engaging.
+        </p>
+      </section>
+      <section class="section" id="about">
+        <h3>About Us</h3>
+        <p>
+          Our mission is to create a dynamic, immersive experience for learners and enthusiasts alike. Through innovative design and cutting‑edge technology, we bring the world of mathematics to life.
+        </p>
+      </section>
+      <section class="section" id="contact">
+        <h3>Contact</h3>
+        <p>
+          Have questions or want to collaborate? Reach out at <a href="mailto:info@vmm.com">info@vmm.com</a>.
+        </p>
+      </section>
+    </main>
+
+    <!-- Footer: Random Bible Verse (RSV-CE) -->
+    <footer>
+      <p id="footer-verse"></p>
+    </footer>
+
+    <!-- JavaScript to toggle dropdown menus, load demo components, and show a random Bible verse -->
+    <script>
+      // Toggle dropdown visibility
+      function toggleDropdown(dropdownId) {
+        const dropdown = document.getElementById(dropdownId);
+        if (dropdown.style.display === 'block') {
+          dropdown.style.display = 'none';
+        } else {
+          document.querySelectorAll('.dropdown').forEach(dd => dd.style.display = 'none');
+          dropdown.style.display = 'block';
+        }
+      }
+
+      // Event listeners for main menu buttons
+      document.getElementById('group-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown('group-dropdown');
+      });
+      document.getElementById('web-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown('web-dropdown');
+      });
+      // Close dropdown if clicking outside the menu
+      window.addEventListener('click', (e) => {
+        if (!e.target.closest('.menu-item')) {
+          document.querySelectorAll('.dropdown').forEach(dd => dd.style.display = 'none');
+        }
+      });
+
+      // Function to load a demo custom element into the demo container
+      function showDemo(type) {
+        // Close any open dropdowns
+        document.querySelectorAll('.dropdown').forEach(dd => dd.style.display = 'none');
+        const container = document.getElementById('demo-container');
+        // Clear previous demo content and show container
+        container.innerHTML = '';
+        container.style.display = 'block';
+        let el;
+        switch (type) {
+          case 'z':
+            el = document.createElement('z-group-demo');
+            break;
+          case 'even':
+            el = document.createElement('even-group-demo');
+            break;
+          case 'triangle':
+            el = document.createElement('triangle-group-demo');
+            break;
+          // For web programming demos:
+          case 'web1':
+            container.innerHTML = '<p>Web Programming Demo 1 coming soon.</p>';
+            return;
+          case 'web2':
+            container.innerHTML = '<p>Web Programming Demo 2 coming soon.</p>';
+            return;
+          default:
+            console.log('Demo for', type, 'selected.');
+            return;
+        }
+        container.appendChild(el);
+      }
+
+      // Function to hide the demo container (Home action)
+      function showHome() {
+        document.querySelectorAll('.dropdown').forEach(dd => dd.style.display = 'none');
+        const container = document.getElementById('demo-container');
+        container.innerHTML = ''; // Clear any demo content
+        container.style.display = 'none';
+      }
+
+      // Array of complete Bible verses in RSV-CE
+      const verses = [
+        "Ecclesiastes 1:13 – 'And I applied my mind to seek and to search out by wisdom all that is done under heaven; it is an unhappy business that God has given to the sons of men to be busy with.'",
+        "Romans 1:20 – 'Ever since the creation of the world his invisible nature, namely, his eternal power and deity, has been clearly perceived in the things that have been made. So they are without excuse;'",
+        "Psalm 19:1 – 'The heavens are telling the glory of God; and the firmament proclaims his handiwork.'",
+        "Colossians 1:16–17 – 'For in him all things were created, in heaven and on earth, visible and invisible, whether thrones or dominions or principalities or authorities—all things were created through him and for him. He is before all things, and in him all things hold together. '",
+        "Proverbs 1:5 – 'The wise man also may hear and increase in learning, and the man of understanding acquire skill,'"
+      ];
+
+      // Randomly select one verse from the array
+      const randomIndex = Math.floor(Math.random() * verses.length);
+      const randomVerse = verses[randomIndex];
+      // Insert the selected verse into the footer element
+      document.getElementById("footer-verse").innerText = randomVerse;
+    </script>
+
+    <!-- Include bundled custom element scripts -->
+    <script type="module" src="dist/z-group-demo.js"></script>
+    <script type="module" src="dist/even-group-demo.js"></script>
+    <script type="module" src="dist/triangle-group-demo.js"></script>
+  </body>
 </html>
