@@ -21,7 +21,7 @@ class TriangleGroupDemo extends HTMLElement {
       // Reset the transform attribute to the identity (no rotation, no scale).
       group.setAttribute("transform", "rotate(0) scale(1)");
     }
-    // Remove any counter-rotation from the vertex labels.
+    // Remove any counter-transform from the vertex labels.
     const labels = this.shadowRoot.querySelectorAll('.vertex-label');
     labels.forEach(label => label.removeAttribute('transform'));
   }
@@ -64,7 +64,7 @@ class TriangleGroupDemo extends HTMLElement {
           // Get the label’s own x and y coordinates.
           const x = label.getAttribute("x");
           const y = label.getAttribute("y");
-          // Rotate the label by the negative of the final angle about its (x,y) center.
+          // Counter the rotation by rotating the label by –targetAngle about its center.
           label.setAttribute("transform", `rotate(-${targetAngle}, ${x}, ${y})`);
         });
       }
@@ -72,7 +72,47 @@ class TriangleGroupDemo extends HTMLElement {
     requestAnimationFrame(step);
   }
   
-  // Existing method for the other buttons (f, r·f, r²·f, etc.)
+  /**
+   * Animate a horizontal flip (reflection) of the triangle.
+   * This interpolates the group’s scale factor from 1 to –1 (in the x‑direction).
+   * When complete, it applies a counter flip to each vertex label so they remain unreflected.
+   *
+   * @param {number} duration - The duration of the animation in milliseconds.
+   */
+  animateFlip(duration = 500) {
+    const group = this.shadowRoot.getElementById("triangle-group");
+    if (!group) return;
+    
+    let startTime = null;
+    const initialScale = 1;
+    const targetScale = -1;
+    
+    const step = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Linear interpolation between 1 and -1.
+      const currentScale = initialScale + progress * (targetScale - initialScale);
+      
+      // Apply the current flip (scaling only the x-axis).
+      group.setAttribute("transform", `scale(${currentScale}, 1)`);
+      
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        // Animation complete.
+        // To counter the group's flip on the vertex labels, apply an extra flip on each label.
+        // (Since scale(-1,1) is its own inverse, the composition gives the identity.)
+        const labels = this.shadowRoot.querySelectorAll('.vertex-label');
+        labels.forEach(label => {
+          label.setAttribute("transform", "scale(-1,1)");
+        });
+      }
+    };
+    requestAnimationFrame(step);
+  }
+  
+  // Existing method for the other buttons (r·f, r²·f, etc.)
   applyTransformation(transformStr) {
     const group = this.shadowRoot.getElementById("triangle-group");
     if (group) {
@@ -197,7 +237,11 @@ class TriangleGroupDemo extends HTMLElement {
           @pointercancel="${() => this.animateRotation(240, 1000)}">
           r² (Rotate 240°)
         </button>
-        <button @click="${() => this.applyTransformation('scale(-1,1)')}">
+        <!-- f button: pointerdown resets, pointerup animates a horizontal flip in 500ms -->
+        <button 
+          @pointerdown="${() => this.resetTriangle()}"
+          @pointerup="${() => this.animateFlip(500)}"
+          @pointercancel="${() => this.animateFlip(500)}">
           f (Reflect)
         </button>
         <button @click="${() => this.applyTransformation('rotate(120) scale(-1,1)')}">
