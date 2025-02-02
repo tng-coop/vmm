@@ -5,26 +5,56 @@ class TriangleGroupDemo extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
   }
-
+  
   connectedCallback() {
     this.render();
   }
-
+  
   applyTransformation(transformStr) {
-    // Get the SVG group element that holds both the triangle and its labels.
+    // This method is used for the other buttons (r, r², f, r·f, r²·f)
     const group = this.shadowRoot.getElementById("triangle-group");
     if (group) {
       const current = group.getAttribute("transform") || "";
       group.animate([{ transform: current }, { transform: transformStr }], {
         duration: 500,
         fill: "forwards",
+        easing: "ease-out"
       });
       group.setAttribute("transform", transformStr);
     }
   }
-
+  
+  raiseTriangle() {
+    // Enlarge the triangle to 1.2x size (simulate "raised by hand")
+    const group = this.shadowRoot.getElementById("triangle-group");
+    if (group) {
+      const current = group.getAttribute("transform") || "";
+      group.animate([{ transform: current }, { transform: "scale(1.2)" }], {
+        duration: 150,
+        fill: "forwards",
+        easing: "ease-out"
+      });
+      group.setAttribute("transform", "scale(1.2)");
+    }
+  }
+  
+  lowerTriangle() {
+    // Return the triangle to its normal size (scale(1))
+    const group = this.shadowRoot.getElementById("triangle-group");
+    if (group) {
+      const current = group.getAttribute("transform") || "";
+      group.animate([{ transform: current }, { transform: "scale(1)" }], {
+        duration: 150,
+        fill: "forwards",
+        easing: "ease-out"
+      });
+      group.setAttribute("transform", "scale(1)");
+    }
+  }
+  
   render() {
-    // Adjust label positions so they appear clearly inside the triangle.
+    // Adjusted label positions so they appear inside the triangle.
+    // Here, the labels "1", "2", and "3" are positioned at (0,-40), (40,20), and (-40,20) respectively.
     const template = html`
       <style>
         :host {
@@ -41,7 +71,7 @@ class TriangleGroupDemo extends HTMLElement {
         svg {
           display: block;
           margin: 0 auto;
-          /* Removed border to eliminate the white box border */
+          /* Removed background and border */
         }
         .buttons {
           text-align: center;
@@ -79,47 +109,19 @@ class TriangleGroupDemo extends HTMLElement {
         <!-- Group containing the triangle and its vertex labels -->
         <g id="triangle-group">
           <!-- Equilateral triangle with vertices at (0,-100), (86.6,50), and (-86.6,50) -->
-          <polygon
-            points="0,-100 86.6,50 -86.6,50"
-            fill="#007BFF"
-            stroke="#0056b3"
-            stroke-width="3"
-          ></polygon>
+          <polygon points="0,-100 86.6,50 -86.6,50" fill="#007BFF" stroke="#0056b3" stroke-width="3"></polygon>
           <!-- Labels positioned inside the triangle -->
-          <text
-            x="0"
-            y="-40"
-            font-size="20"
-            text-anchor="middle"
-            fill="white"
-            dominant-baseline="middle"
-          >
-            1
-          </text>
-          <text
-            x="40"
-            y="20"
-            font-size="20"
-            text-anchor="middle"
-            fill="white"
-            dominant-baseline="middle"
-          >
-            2
-          </text>
-          <text
-            x="-40"
-            y="20"
-            font-size="20"
-            text-anchor="middle"
-            fill="white"
-            dominant-baseline="middle"
-          >
-            3
-          </text>
+          <text x="0" y="-40" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">1</text>
+          <text x="40" y="20" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">2</text>
+          <text x="-40" y="20" font-size="20" text-anchor="middle" fill="white" dominant-baseline="middle">3</text>
         </g>
       </svg>
       <div class="buttons">
-        <button @click="${() => this.applyTransformation('')}">
+        <!-- Identity button now uses pointer events for press-and-hold behavior -->
+        <button id="identity-button"
+          @pointerdown="${() => this.raiseTriangle()}"
+          @pointerup="${() => this.lowerTriangle()}"
+          @pointercancel="${() => this.lowerTriangle()}">
           1 (Identity)
         </button>
         <button @click="${() => this.applyTransformation('rotate(120)')}">
@@ -131,14 +133,10 @@ class TriangleGroupDemo extends HTMLElement {
         <button @click="${() => this.applyTransformation('scale(-1,1)')}">
           f (Reflect)
         </button>
-        <button
-          @click="${() => this.applyTransformation('rotate(120) scale(-1,1)')}"
-        >
+        <button @click="${() => this.applyTransformation('rotate(120) scale(-1,1)')}">
           r·f
         </button>
-        <button
-          @click="${() => this.applyTransformation('rotate(240) scale(-1,1)')}"
-        >
+        <button @click="${() => this.applyTransformation('rotate(240) scale(-1,1)')}">
           r²·f
         </button>
       </div>
