@@ -74,6 +74,7 @@
     <nav class="demo-nav">
       <button onclick="showDemo('z')">Z Group Demo</button>
       <button onclick="showDemo('even')">Even Numbers Demo</button>
+      <button onclick="showDemo('triangle')">Triangle Group Demo</button>
     </nav>
     
     <!-- Custom elements -->
@@ -83,6 +84,9 @@
     <div id="even-demo" class="demo">
       <even-group-demo></even-group-demo>
     </div>
+    <div id="triangle-demo" class="demo">
+      <triangle-group-demo></triangle-group-demo>
+    </div>
   </main>
   <footer>
     <p>© 2025 Virtual Museum of Math</p>
@@ -91,15 +95,19 @@
   <!-- Include the bundled web component scripts -->
   <script type="module" src="dist/z-group-demo.js"></script>
   <script type="module" src="dist/even-group-demo.js"></script>
+  <script type="module" src="dist/triangle-group-demo.js"></script>
   
   <script>
     function showDemo(type) {
       document.getElementById('z-demo').classList.remove('active');
       document.getElementById('even-demo').classList.remove('active');
+      document.getElementById('triangle-demo').classList.remove('active');
       if (type === 'z') {
         document.getElementById('z-demo').classList.add('active');
       } else if (type === 'even') {
         document.getElementById('even-demo').classList.add('active');
+      } else if (type === 'triangle') {
+        document.getElementById('triangle-demo').classList.add('active');
       }
     }
   </script>
