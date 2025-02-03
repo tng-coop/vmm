@@ -1,7 +1,6 @@
 import { html, render } from "lit";
 
 // --- Helper functions for D₃ ---
-
 // Represent each element as an object { k, d } where k ∈ {0,1,2} and d ∈ {0,1}.
 // Here, d = 0 means no reflection (a rotation) and d = 1 means reflection.
 // Mapping:
@@ -63,8 +62,21 @@ function displayD3(elem) {
   }
 }
 
-// --- The TriangleGroupDemo Component ---
+/* 
+  For a triangle with vertices (top, right, left) initially labeled ["1", "2", "3"],
+  we define the permutation (i.e. the new label ordering) associated with each D₃ element.
+  (We assume here that f is the reflection fixing the top vertex.)
+*/
+const vertexPermutations = {
+  "1":   ["1", "2", "3"],
+  "r":   ["3", "1", "2"],  // r rotates so that: top becomes old left, right becomes old top, left becomes old right.
+  "r2":  ["2", "3", "1"],  // r² rotates so that: top becomes old right, right becomes old left, left becomes old top.
+  "f":   ["1", "3", "2"],  // f (reflection) fixes the top and swaps right and left.
+  "rf":  ["2", "1", "3"],  // rf = r · f yields: top becomes old right, right becomes old top, left becomes old left? (see below)
+  "r2f": ["3", "2", "1"]   // r²f = r² · f yields: top becomes old left, right becomes old right, left becomes old top.
+};
 
+// --- The TriangleGroupDemo Component ---
 class TriangleGroupDemo extends HTMLElement {
   constructor() {
     super();
@@ -80,18 +92,37 @@ class TriangleGroupDemo extends HTMLElement {
   }
   
   /**
+   * Update the text content of the vertex labels based on the current group element.
+   */
+  updateVertexLabels() {
+    const permutation = vertexPermutations[this.currentElement];
+    if (!permutation) return;
+    const labels = this.shadowRoot.querySelectorAll('.vertex-label');
+    if (labels.length >= 3) {
+      labels[0].textContent = permutation[0];
+      labels[1].textContent = permutation[1];
+      labels[2].textContent = permutation[2];
+    }
+  }
+  
+  /**
    * Reset the triangle’s transformations and vertex labels.
-   * (Called only when the explicit Reset button is pressed.)
    */
   resetTriangle() {
     const group = this.shadowRoot.getElementById("triangle-group");
     if (group) {
       group.getAnimations().forEach(animation => animation.cancel());
-      // Reset the transform to identity
+      // Reset the transform to identity.
       group.setAttribute("transform", "rotate(0) scale(1)");
     }
     const labels = this.shadowRoot.querySelectorAll('.vertex-label');
-    labels.forEach(label => label.removeAttribute('transform'));
+    labels.forEach(label => {
+      label.removeAttribute('transform');
+      // Reset the label text to the default ordering.
+      // (Assuming initial order is "1", "2", "3")
+      // You could also reset them directly:
+      // label.textContent = (label.getAttribute("data-default") || label.textContent);
+    });
   }
   
   /**
@@ -100,6 +131,7 @@ class TriangleGroupDemo extends HTMLElement {
   resetDemo() {
     this.resetTriangle();
     this.currentElement = "1";
+    this.updateVertexLabels();
     const formulaDisplay = this.shadowRoot.getElementById("formula-display");
     if (formulaDisplay) {
       formulaDisplay.innerHTML = `Result: <math><mrow>${displayD3("1")}<mo>=</mo>${displayD3("1")}</mrow></math>`;
@@ -118,7 +150,7 @@ class TriangleGroupDemo extends HTMLElement {
     }
   }
   
-  // --- Helpers to extract the current transform values ---
+  // --- Helpers to read current transform values ---
   
   getCurrentRotation() {
     const group = this.shadowRoot.getElementById("triangle-group");
@@ -135,9 +167,9 @@ class TriangleGroupDemo extends HTMLElement {
   }
   
   /**
-   * Animate a rotation.
-   * Instead of always starting from 0, we now read the current rotation
-   * and animate from that value to (current rotation + targetAngle).
+   * Animate a rotation relative to the current rotation.
+   * The triangle rotates from its current rotation to (current rotation + targetAngle)
+   * while preserving the current scale.
    */
   animateRotation(targetAngle, duration = 500) {
     const group = this.shadowRoot.getElementById("triangle-group");
@@ -145,7 +177,6 @@ class TriangleGroupDemo extends HTMLElement {
     let startTime = null;
     const startAngle = this.getCurrentRotation();
     const finalAngle = startAngle + targetAngle;
-    // Also preserve the current scale:
     const currentScale = this.getCurrentScale();
     const step = (timestamp) => {
       if (!startTime) startTime = timestamp;
@@ -156,39 +187,48 @@ class TriangleGroupDemo extends HTMLElement {
       if (progress < 1) {
         requestAnimationFrame(step);
       } else {
-        // Adjust the labels to counter the rotation.
+        // Adjust vertex labels to counter the rotation.
         const labels = this.shadowRoot.querySelectorAll('.vertex-label');
         labels.forEach(label => {
           const x = label.getAttribute("x");
           const y = label.getAttribute("y");
           label.setAttribute("transform", `rotate(-${finalAngle}, ${x}, ${y})`);
         });
+        // For a pure rotation, you may also update the vertex labels.
+        // (Uncomment the next line if you want rotations to reassign the numbers.)
+        // this.updateVertexLabels();
       }
     };
     requestAnimationFrame(step);
   }
   
   /**
-   * Animate a horizontal flip (reflection) without resetting the current rotation.
-   * We animate from the current scale (typically 1) to -1.
+   * Animate a horizontal flip (reflection) about a fixed global axis.
+   * (The fixed global axis is the vertical line through (0,-100).)
+   * This is done by composing the transform:
+   *   translate(0, 100) scale(s,1) translate(0, -100) rotate(currentRotation)
+   * where s is animated from 1 to -1.
    */
   animateFlip(duration = 500) {
     const group = this.shadowRoot.getElementById("triangle-group");
     if (!group) return;
     let startTime = null;
-    const startScale = this.getCurrentScale();
-    const targetScale = -1;
-    // Preserve the current rotation.
+    const startS = 1;
+    const targetS = -1;
     const currentRotation = this.getCurrentRotation();
     const step = (timestamp) => {
       if (!startTime) startTime = timestamp;
       const elapsed  = timestamp - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const currentScale = startScale + progress * (targetScale - startScale);
-      group.setAttribute("transform", `rotate(${currentRotation}) scale(${currentScale}, 1)`);
+      const s = startS + progress * (targetS - startS);
+      // Use fixed global axis by applying flip (translate/scale/translate) first, then the rotation.
+      group.setAttribute("transform",
+        `translate(0, 100) scale(${s},1) translate(0, -100) rotate(${currentRotation})`
+      );
       if (progress < 1) {
         requestAnimationFrame(step);
       } else {
+        // Adjust vertex labels (for orientation) as before.
         const labels = this.shadowRoot.querySelectorAll('.vertex-label');
         labels.forEach(label => {
           const x = label.getAttribute("x");
@@ -197,6 +237,8 @@ class TriangleGroupDemo extends HTMLElement {
             `translate(${x}, ${y}) scale(-1,1) translate(${-x}, ${-y})`
           );
         });
+        // Now update the actual text (number) on each vertex based on the new group element.
+        this.updateVertexLabels();
       }
     };
     requestAnimationFrame(step);
@@ -204,26 +246,29 @@ class TriangleGroupDemo extends HTMLElement {
   
   /**
    * Animate a flip then a rotation.
-   * First, animate the flip (scale from the current value to -1) while preserving rotation.
-   * Then, animate the rotation (add targetAngle to the current rotation).
+   * First the triangle flips about the fixed global axis (using the modified composite transform)
+   * and then rotates by targetAngle.
    */
   animateFlipThenRotation(targetAngle, flipDuration = 500, rotationDuration = 500) {
     const group = this.shadowRoot.getElementById("triangle-group");
     if (!group) return;
-    let startTimeFlip = null;
     const initialRotation = this.getCurrentRotation();
-    const startScale = this.getCurrentScale();
-    const flipTargetScale = -1;
+    const startS = 1;
+    const targetS = -1;
+    let startTimeFlip = null;
     const stepFlip = (timestamp) => {
       if (!startTimeFlip) startTimeFlip = timestamp;
       const elapsed = timestamp - startTimeFlip;
       const progress = Math.min(elapsed / flipDuration, 1);
-      const currentScale = startScale + progress * (flipTargetScale - startScale);
-      // Keep rotation constant during flip.
-      group.setAttribute("transform", `rotate(${initialRotation}) scale(${currentScale}, 1)`);
+      const s = startS + progress * (targetS - startS);
+      // During flip, keep the rotation constant.
+      group.setAttribute("transform",
+        `translate(0, 100) scale(${s},1) translate(0, -100) rotate(${initialRotation})`
+      );
       if (progress < 1) {
         requestAnimationFrame(stepFlip);
       } else {
+        // Adjust labels for the flip.
         const labels = this.shadowRoot.querySelectorAll('.vertex-label');
         labels.forEach(label => {
           const x = label.getAttribute("x");
@@ -232,6 +277,8 @@ class TriangleGroupDemo extends HTMLElement {
             `translate(${x}, ${y}) scale(-1,1) translate(${-x}, ${-y})`
           );
         });
+        // Update vertex numbers after the flip.
+        this.updateVertexLabels();
         startRotationPhase();
       }
     };
@@ -243,8 +290,10 @@ class TriangleGroupDemo extends HTMLElement {
         const elapsed = timestamp - startTimeRot;
         const progress = Math.min(elapsed / rotationDuration, 1);
         const currentRotation = initialRotation + progress * (finalRotation - initialRotation);
-        // Keep scale at -1 during the rotation phase.
-        group.setAttribute("transform", `rotate(${currentRotation}) scale(-1,1)`);
+        // Keep the flipped scale (-1) constant during the rotation phase.
+        group.setAttribute("transform",
+          `translate(0, 100) scale(${targetS},1) translate(0, -100) rotate(${currentRotation})`
+        );
         if (progress < 1) {
           requestAnimationFrame(stepRotation);
         } else {
@@ -256,6 +305,8 @@ class TriangleGroupDemo extends HTMLElement {
               `translate(${x}, ${y}) scale(-1,1) rotate(-${finalRotation}) translate(${-x}, ${-y})`
             );
           });
+          // Update the vertex numbers after the composite operation.
+          this.updateVertexLabels();
         }
       };
       requestAnimationFrame(stepRotation);
@@ -265,7 +316,7 @@ class TriangleGroupDemo extends HTMLElement {
   
   /**
    * Visual “raise” effect.
-   * (Simply animates a scale-up; note that we do not reset the transform on mouse release.)
+   * (This scales the triangle up slightly for visual feedback; it does not override the accumulated transform.)
    */
   raiseTriangle() {
     const group = this.shadowRoot.getElementById("triangle-group");
@@ -274,12 +325,26 @@ class TriangleGroupDemo extends HTMLElement {
       group.animate([{ transform: current }, { transform: current + " scale(1.2)" }], {
         duration: 150, fill: "forwards", easing: "ease-out"
       });
-      // Do not override the transform attribute here.
+    }
+  }
+  
+  /**
+   * Visual “lower” effect.
+   * (Used with the identity button to give press–release feedback without resetting the accumulated transform.)
+   */
+  lowerTriangle() {
+    const group = this.shadowRoot.getElementById("triangle-group");
+    if (group) {
+      const current = group.getAttribute("transform") || "";
+      group.animate([{ transform: current }, { transform: current.replace(/scale\([^)]*\)/, "scale(1)") }], {
+        duration: 150, fill: "forwards", easing: "ease-out"
+      });
     }
   }
   
   /**
    * Set up the interactive sections for the D₃ group properties.
+   * (These remain unchanged from before.)
    */
   setupInteractive() {
     // Closure
@@ -388,12 +453,12 @@ class TriangleGroupDemo extends HTMLElement {
       </style>
       <h1>Triangle Group Demonstration (Dihedral Group D₃)</h1>
       
-      <!-- Formula display -->
+      <!-- Formula display: shows the “current multiplication” -->
       <div id="formula-display">
         Result: <math><mrow>${displayD3("1")}<mo>=</mo>${displayD3("1")}</mrow></math>
       </div>
       
-      <!-- Animated triangle -->
+      <!-- Animated triangle with transformation buttons -->
       <svg id="triangle-svg" width="300" height="300" viewBox="-150 -150 300 300">
         <g id="triangle-group">
           <polygon points="0,-100 86.6,50 -86.6,50" fill="#007BFF" stroke="#0056b3" stroke-width="3"></polygon>
@@ -405,7 +470,7 @@ class TriangleGroupDemo extends HTMLElement {
       </svg>
       
       <div class="buttons">
-        <!-- Identity button: applies identity transformation (i.e. no change) -->
+        <!-- Identity button: New element = 1 · (current) -->
         <button id="identity-button"
           @pointerdown="${() => this.raiseTriangle()}"
           @pointerup="${() => {
@@ -413,12 +478,13 @@ class TriangleGroupDemo extends HTMLElement {
               const newElem = composeD3(trans, this.currentElement);
               this.updateFormulaDisplay(trans, this.currentElement, newElem);
               this.currentElement = newElem;
-              // (No reset or lower effect here)
+              this.updateVertexLabels();
+              this.lowerTriangle();
           }}"
           @pointercancel="${() => {}}">
           1 (Identity)
         </button>
-        <!-- Rotation by 120° -->
+        <!-- Rotation by 120°: New element = r · (current) -->
         <button 
           @pointerdown="${() => {}}"
           @pointerup="${() => {
@@ -431,7 +497,7 @@ class TriangleGroupDemo extends HTMLElement {
           @pointercancel="${() => this.animateRotation(120, 500)}">
           r (Rotate 120°)
         </button>
-        <!-- Rotation by 240° -->
+        <!-- Rotation by 240° (r²): New element = r² · (current) -->
         <button 
           @pointerdown="${() => {}}"
           @pointerup="${() => {
@@ -444,7 +510,7 @@ class TriangleGroupDemo extends HTMLElement {
           @pointercancel="${() => this.animateRotation(240, 1000)}">
           r² (Rotate 240°)
         </button>
-        <!-- Reflection -->
+        <!-- Reflection: New element = f · (current) -->
         <button 
           @pointerdown="${() => {}}"
           @pointerup="${() => {
@@ -457,7 +523,7 @@ class TriangleGroupDemo extends HTMLElement {
           @pointercancel="${() => this.animateFlip(500)}">
           f (Reflect)
         </button>
-        <!-- Reflection then rotation (r·f) -->
+        <!-- Reflection then rotation (r · f): New element = (r·f) · (current) -->
         <button 
           @pointerdown="${() => {}}"
           @pointerup="${() => {
@@ -470,7 +536,7 @@ class TriangleGroupDemo extends HTMLElement {
           @pointercancel="${() => this.animateFlipThenRotation(120, 500, 500)}">
           r·f
         </button>
-        <!-- Reflection then rotation (r²·f) -->
+        <!-- Reflection then rotation (r² · f): New element = (r²·f) · (current) -->
         <button 
           @pointerdown="${() => {}}"
           @pointerup="${() => {
@@ -490,9 +556,98 @@ class TriangleGroupDemo extends HTMLElement {
         </button>
       </div>
       
-      <!-- Interactive sections for group properties (unchanged) -->
+      <!-- Interactive sections for group properties -->
       <div class="interactive">
-        <!-- (Interactive content here remains the same as your original code.) -->
+        <section id="closure">
+          <h2>Closure</h2>
+          <p>Select two elements to check closure under composition:</p>
+          <label for="closure-a">a:</label>
+          <select id="closure-a">
+            <option value="1">1</option>
+            <option value="r">r</option>
+            <option value="r2">r²</option>
+            <option value="f">f</option>
+            <option value="rf">r·f</option>
+            <option value="r2f">r²·f</option>
+          </select>
+          <label for="closure-b">b:</label>
+          <select id="closure-b">
+            <option value="1">1</option>
+            <option value="r">r</option>
+            <option value="r2">r²</option>
+            <option value="f">f</option>
+            <option value="rf">r·f</option>
+            <option value="r2f">r²·f</option>
+          </select>
+          <button id="check-closure">Check Closure</button>
+          <div id="closure-result" class="result"></div>
+        </section>
+        
+        <section id="identity-property">
+          <h2>Identity</h2>
+          <p>Select an element to see that composing with the identity yields the same element:</p>
+          <label for="identity-element">a:</label>
+          <select id="identity-element">
+            <option value="1">1</option>
+            <option value="r">r</option>
+            <option value="r2">r²</option>
+            <option value="f">f</option>
+            <option value="rf">r·f</option>
+            <option value="r2f">r²·f</option>
+          </select>
+          <button id="check-identity-prop">Check Identity</button>
+          <div id="identity-result-prop" class="result"></div>
+        </section>
+        
+        <section id="associativity-property">
+          <h2>Associativity</h2>
+          <p>Select three elements to verify associativity: (a·b)·c = a·(b·c)</p>
+          <label for="assoc-a">a:</label>
+          <select id="assoc-a">
+            <option value="1">1</option>
+            <option value="r">r</option>
+            <option value="r2">r²</option>
+            <option value="f">f</option>
+            <option value="rf">r·f</option>
+            <option value="r2f">r²·f</option>
+          </select>
+          <label for="assoc-b">b:</label>
+          <select id="assoc-b">
+            <option value="1">1</option>
+            <option value="r">r</option>
+            <option value="r2">r²</option>
+            <option value="f">f</option>
+            <option value="rf">r·f</option>
+            <option value="r2f">r²·f</option>
+          </select>
+          <label for="assoc-c">c:</label>
+          <select id="assoc-c">
+            <option value="1">1</option>
+            <option value="r">r</option>
+            <option value="r2">r²</option>
+            <option value="f">f</option>
+            <option value="rf">r·f</option>
+            <option value="r2f">r²·f</option>
+          </select>
+          <button id="check-associativity-prop">Check Associativity</button>
+          <div id="associativity-result-prop" class="result"></div>
+        </section>
+        
+        <section id="inverse-property">
+          <h2>Inverse</h2>
+          <p>Select an element to find its inverse (b such that a·b = 1):</p>
+          <label for="inverse-element">a:</label>
+          <select id="inverse-element">
+            <option value="1">1</option>
+            <option value="r">r</option>
+            <option value="r2">r²</option>
+            <option value="f">f</option>
+            <option value="rf">r·f</option>
+            <option value="r2f">r²·f</option>
+          </select>
+          <button id="check-inverse-prop">Check Inverse</button>
+          <div id="inverse-result-prop" class="result"></div>
+        </section>
       </div>
     `;
     render(template, this.shadowRoot);
