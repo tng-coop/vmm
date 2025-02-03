@@ -62,20 +62,6 @@ function displayD3(elem) {
   }
 }
 
-/* 
-  For a triangle with vertices (top, right, left) initially labeled ["1", "2", "3"],
-  we define the permutation (i.e. the new label ordering) associated with each D₃ element.
-  (We assume here that f is the reflection fixing the top vertex.)
-*/
-const vertexPermutations = {
-  "1":   ["1", "2", "3"],
-  "r":   ["3", "1", "2"],  // r rotates so that: top becomes old left, right becomes old top, left becomes old right.
-  "r2":  ["2", "3", "1"],  // r² rotates so that: top becomes old right, right becomes old left, left becomes old top.
-  "f":   ["1", "3", "2"],  // f (reflection) fixes the top and swaps right and left.
-  "rf":  ["2", "1", "3"],  // rf = r · f yields: top becomes old right, right becomes old top, left becomes old left? (see below)
-  "r2f": ["3", "2", "1"]   // r²f = r² · f yields: top becomes old left, right becomes old right, left becomes old top.
-};
-
 // --- The TriangleGroupDemo Component ---
 class TriangleGroupDemo extends HTMLElement {
   constructor() {
@@ -92,20 +78,6 @@ class TriangleGroupDemo extends HTMLElement {
   }
   
   /**
-   * Update the text content of the vertex labels based on the current group element.
-   */
-  updateVertexLabels() {
-    const permutation = vertexPermutations[this.currentElement];
-    if (!permutation) return;
-    const labels = this.shadowRoot.querySelectorAll('.vertex-label');
-    if (labels.length >= 3) {
-      labels[0].textContent = permutation[0];
-      labels[1].textContent = permutation[1];
-      labels[2].textContent = permutation[2];
-    }
-  }
-  
-  /**
    * Reset the triangle’s transformations and vertex labels.
    */
   resetTriangle() {
@@ -116,13 +88,7 @@ class TriangleGroupDemo extends HTMLElement {
       group.setAttribute("transform", "rotate(0) scale(1)");
     }
     const labels = this.shadowRoot.querySelectorAll('.vertex-label');
-    labels.forEach(label => {
-      label.removeAttribute('transform');
-      // Reset the label text to the default ordering.
-      // (Assuming initial order is "1", "2", "3")
-      // You could also reset them directly:
-      // label.textContent = (label.getAttribute("data-default") || label.textContent);
-    });
+    labels.forEach(label => label.removeAttribute('transform'));
   }
   
   /**
@@ -131,7 +97,6 @@ class TriangleGroupDemo extends HTMLElement {
   resetDemo() {
     this.resetTriangle();
     this.currentElement = "1";
-    this.updateVertexLabels();
     const formulaDisplay = this.shadowRoot.getElementById("formula-display");
     if (formulaDisplay) {
       formulaDisplay.innerHTML = `Result: <math><mrow>${displayD3("1")}<mo>=</mo>${displayD3("1")}</mrow></math>`;
@@ -194,19 +159,16 @@ class TriangleGroupDemo extends HTMLElement {
           const y = label.getAttribute("y");
           label.setAttribute("transform", `rotate(-${finalAngle}, ${x}, ${y})`);
         });
-        // For a pure rotation, you may also update the vertex labels.
-        // (Uncomment the next line if you want rotations to reassign the numbers.)
-        // this.updateVertexLabels();
       }
     };
     requestAnimationFrame(step);
   }
   
   /**
-   * Animate a horizontal flip (reflection) about a fixed global axis.
-   * (The fixed global axis is the vertical line through (0,-100).)
+   * Animate a horizontal flip (reflection) about the triangle’s top vertex.
+   * (In your polygon the top vertex is at (0,-100).)
    * This is done by composing the transform:
-   *   translate(0, 100) scale(s,1) translate(0, -100) rotate(currentRotation)
+   *   rotate(currentRotation) translate(0, 100) scale(s,1) translate(0, -100)
    * where s is animated from 1 to -1.
    */
   animateFlip(duration = 500) {
@@ -221,14 +183,14 @@ class TriangleGroupDemo extends HTMLElement {
       const elapsed  = timestamp - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const s = startS + progress * (targetS - startS);
-      // Use fixed global axis by applying flip (translate/scale/translate) first, then the rotation.
+      // Reflect about (0,-100): first translate so that (0,-100) becomes the origin.
       group.setAttribute("transform",
-        `translate(0, 100) scale(${s},1) translate(0, -100) rotate(${currentRotation})`
+        `rotate(${currentRotation}) translate(0, 100) scale(${s},1) translate(0, -100)`
       );
       if (progress < 1) {
         requestAnimationFrame(step);
       } else {
-        // Adjust vertex labels (for orientation) as before.
+        // Adjust vertex labels as before.
         const labels = this.shadowRoot.querySelectorAll('.vertex-label');
         labels.forEach(label => {
           const x = label.getAttribute("x");
@@ -237,8 +199,6 @@ class TriangleGroupDemo extends HTMLElement {
             `translate(${x}, ${y}) scale(-1,1) translate(${-x}, ${-y})`
           );
         });
-        // Now update the actual text (number) on each vertex based on the new group element.
-        this.updateVertexLabels();
       }
     };
     requestAnimationFrame(step);
@@ -246,7 +206,7 @@ class TriangleGroupDemo extends HTMLElement {
   
   /**
    * Animate a flip then a rotation.
-   * First the triangle flips about the fixed global axis (using the modified composite transform)
+   * First the triangle flips about its top vertex (using the same composite transform as animateFlip)
    * and then rotates by targetAngle.
    */
   animateFlipThenRotation(targetAngle, flipDuration = 500, rotationDuration = 500) {
@@ -261,9 +221,9 @@ class TriangleGroupDemo extends HTMLElement {
       const elapsed = timestamp - startTimeFlip;
       const progress = Math.min(elapsed / flipDuration, 1);
       const s = startS + progress * (targetS - startS);
-      // During flip, keep the rotation constant.
+      // During flip, keep rotation constant.
       group.setAttribute("transform",
-        `translate(0, 100) scale(${s},1) translate(0, -100) rotate(${initialRotation})`
+        `rotate(${initialRotation}) translate(0, 100) scale(${s},1) translate(0, -100)`
       );
       if (progress < 1) {
         requestAnimationFrame(stepFlip);
@@ -277,8 +237,6 @@ class TriangleGroupDemo extends HTMLElement {
             `translate(${x}, ${y}) scale(-1,1) translate(${-x}, ${-y})`
           );
         });
-        // Update vertex numbers after the flip.
-        this.updateVertexLabels();
         startRotationPhase();
       }
     };
@@ -290,9 +248,9 @@ class TriangleGroupDemo extends HTMLElement {
         const elapsed = timestamp - startTimeRot;
         const progress = Math.min(elapsed / rotationDuration, 1);
         const currentRotation = initialRotation + progress * (finalRotation - initialRotation);
-        // Keep the flipped scale (-1) constant during the rotation phase.
+        // Keep the flipped scale (-1) constant during rotation phase.
         group.setAttribute("transform",
-          `translate(0, 100) scale(${targetS},1) translate(0, -100) rotate(${currentRotation})`
+          `rotate(${currentRotation}) translate(0, 100) scale(${targetS},1) translate(0, -100)`
         );
         if (progress < 1) {
           requestAnimationFrame(stepRotation);
@@ -305,8 +263,6 @@ class TriangleGroupDemo extends HTMLElement {
               `translate(${x}, ${y}) scale(-1,1) rotate(-${finalRotation}) translate(${-x}, ${-y})`
             );
           });
-          // Update the vertex numbers after the composite operation.
-          this.updateVertexLabels();
         }
       };
       requestAnimationFrame(stepRotation);
@@ -478,7 +434,6 @@ class TriangleGroupDemo extends HTMLElement {
               const newElem = composeD3(trans, this.currentElement);
               this.updateFormulaDisplay(trans, this.currentElement, newElem);
               this.currentElement = newElem;
-              this.updateVertexLabels();
               this.lowerTriangle();
           }}"
           @pointercancel="${() => {}}">
