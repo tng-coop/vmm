@@ -1,4 +1,4 @@
-import{B as t,x as e}from"./lit-element-d0893540.js";const o={1:{k:0,d:0},r:{k:1,d:0},r2:{k:2,d:0},f:{k:0,d:1},rf:{k:1,d:1},r2f:{k:2,d:1}};function i(t,e){const i=o[t],n=o[e];let r=i.k+(0===i.d?n.k:-n.k);r=(r%3+3)%3;const a=(i.d+n.d)%2;for(let t in o){const e=o[t];if(e.k===r&&e.d===a)return t}return null}function n(t){switch(t){case"1":return"<mi>1</mi>";case"r":return"<mi>r</mi>";case"r2":return"<msup><mi>r</mi><mn>2</mn></msup>";case"f":return"<mi>f</mi>";case"rf":return"<mrow><mi>r</mi><mo>&#x22C5;</mo><mi>f</mi></mrow>";case"r2f":return"<mrow><msup><mi>r</mi><mn>2</mn></msup><mo>&#x22C5;</mo><mi>f</mi></mrow>";default:return`<mi>${t}</mi>`}}class r extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"})}connectedCallback(){this.render(),this.setupInteractive()}resetTriangle(){const t=this.shadowRoot.getElementById("triangle-group");t&&(t.getAnimations().forEach((t=>t.cancel())),t.setAttribute("transform","rotate(0) scale(1)"));this.shadowRoot.querySelectorAll(".vertex-label").forEach((t=>t.removeAttribute("transform")))}animateRotation(t,e=500){const o=this.shadowRoot.getElementById("triangle-group");if(!o)return;let i=null;const n=r=>{i||(i=r);const a=r-i,s=Math.min(a/e,1),l=0+s*(t-0);if(o.setAttribute("transform",`rotate(${l})`),s<1)requestAnimationFrame(n);else{this.shadowRoot.querySelectorAll(".vertex-label").forEach((e=>{const o=e.getAttribute("x"),i=e.getAttribute("y");e.setAttribute("transform",`rotate(-${t}, ${o}, ${i})`)}))}};requestAnimationFrame(n)}animateFlip(t=500){const e=this.shadowRoot.getElementById("triangle-group");if(!e)return;let o=null;const i=n=>{o||(o=n);const r=n-o,a=Math.min(r/t,1),s=1+-2*a;if(e.setAttribute("transform",`rotate(0) scale(${s}, 1)`),a<1)requestAnimationFrame(i);else{this.shadowRoot.querySelectorAll(".vertex-label").forEach((t=>{const e=t.getAttribute("x"),o=t.getAttribute("y");t.setAttribute("transform",`translate(${e}, ${o}) scale(-1,1) translate(${-e}, ${-o})`)}))}};requestAnimationFrame(i)}animateFlipThenRotation(t,e=500,o=500){const i=this.shadowRoot.getElementById("triangle-group");if(!i)return;let n=null;const r=t=>{n||(n=t);const o=t-n,s=Math.min(o/e,1),l=1+-2*s;if(i.setAttribute("transform",`rotate(0) scale(${l}, 1)`),s<1)requestAnimationFrame(r);else{this.shadowRoot.querySelectorAll(".vertex-label").forEach((t=>{const e=t.getAttribute("x"),o=t.getAttribute("y");t.setAttribute("transform",`translate(${e}, ${o}) scale(-1,1) translate(${-e}, ${-o})`)})),a()}},a=()=>{let e=null;const n=r=>{e||(e=r);const a=r-e,s=Math.min(a/o,1),l=s*t;if(i.setAttribute("transform",`rotate(${l}) scale(-1,1)`),s<1)requestAnimationFrame(n);else{this.shadowRoot.querySelectorAll(".vertex-label").forEach((e=>{const o=e.getAttribute("x"),i=e.getAttribute("y");e.setAttribute("transform",`translate(${o}, ${i}) scale(-1,1) rotate(-${t}) translate(${-o}, ${-i})`)}))}};requestAnimationFrame(n)};requestAnimationFrame(r)}raiseTriangle(){const t=this.shadowRoot.getElementById("triangle-group");if(t){const e=t.getAttribute("transform")||"";t.animate([{transform:e},{transform:"scale(1.2)"}],{duration:150,fill:"forwards",easing:"ease-out"}),t.setAttribute("transform","scale(1.2)")}}lowerTriangle(){const t=this.shadowRoot.getElementById("triangle-group");if(t){const e=t.getAttribute("transform")||"";t.animate([{transform:e},{transform:"scale(1)"}],{duration:150,fill:"forwards",easing:"ease-out"}),t.setAttribute("transform","scale(1)")}}setupInteractive(){this.shadowRoot.getElementById("check-closure").addEventListener("click",(()=>{const t=this.shadowRoot.getElementById("closure-a").value,e=this.shadowRoot.getElementById("closure-b").value,o=i(t,e);this.shadowRoot.getElementById("closure-result").innerHTML=`Result: <math><mrow>${n(t)}<mo>&#x22C5;</mo>${n(e)}<mo>=</mo>${n(o)}</mrow></math>. Closure holds because the result is in D₃.`})),this.shadowRoot.getElementById("check-identity-prop").addEventListener("click",(()=>{const t=this.shadowRoot.getElementById("identity-element").value,e=i("1",t);this.shadowRoot.getElementById("identity-result-prop").innerHTML=`Result: <math><mrow>${n("1")}<mo>&#x22C5;</mo>${n(t)}<mo>=</mo>${n(e)}</mrow></math>. The identity element is 1.`})),this.shadowRoot.getElementById("check-associativity-prop").addEventListener("click",(()=>{const t=this.shadowRoot.getElementById("assoc-a").value,e=this.shadowRoot.getElementById("assoc-b").value,o=this.shadowRoot.getElementById("assoc-c").value,r=i(i(t,e),o),a=i(t,i(e,o));let s=`Result: <math><mrow>( ${n(t)}<mo>&#x22C5;</mo>${n(e)} )<mo>&#x22C5;</mo>${n(o)}<mo>=</mo>${n(r)}</mrow></math> and <math><mrow>${n(t)}<mo>&#x22C5;</mo>( ${n(e)}<mo>&#x22C5;</mo>${n(o)} )<mo>=</mo>${n(a)}</mrow></math>. `;s+=r===a?"Associativity holds.":"Associativity fails!",this.shadowRoot.getElementById("associativity-result-prop").innerHTML=s})),this.shadowRoot.getElementById("check-inverse-prop").addEventListener("click",(()=>{const t=this.shadowRoot.getElementById("inverse-element").value,e=function(t){for(let e in o)if("1"===i(t,e))return e;return null}(t);i(t,e),this.shadowRoot.getElementById("inverse-result-prop").innerHTML=`Result: <math><mrow>${n(t)}<mo>&#x22C5;</mo>${n(e)}<mo>=</mo><mi>1</mi></mrow></math>  Inverse holds.`}))}render(){const o=e`
+import{B as t,x as e}from"./lit-element-d0893540.js";const o={1:{k:0,d:0},r:{k:1,d:0},r2:{k:2,d:0},f:{k:0,d:1},rf:{k:1,d:1},r2f:{k:2,d:1}};function n(t,e){const n=o[t],i=o[e];let r=n.k+(0===n.d?i.k:-i.k);r=(r%3+3)%3;const a=(n.d+i.d)%2;for(let t in o){const e=o[t];if(e.k===r&&e.d===a)return t}return null}function i(t){switch(t){case"1":return"<mi>1</mi>";case"r":return"<mi>r</mi>";case"r2":return"<msup><mi>r</mi><mn>2</mn></msup>";case"f":return"<mi>f</mi>";case"rf":return"<mrow><mi>r</mi><mo>&#x22C5;</mo><mi>f</mi></mrow>";case"r2f":return"<mrow><msup><mi>r</mi><mn>2</mn></msup><mo>&#x22C5;</mo><mi>f</mi></mrow>";default:return`<mi>${t}</mi>`}}class r extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this.currentElement="1"}connectedCallback(){this.render(),this.resetDemo(),this.setupInteractive()}resetTriangle(){const t=this.shadowRoot.getElementById("triangle-group");t&&(t.getAnimations().forEach((t=>t.cancel())),t.setAttribute("transform","rotate(0) scale(1)"));this.shadowRoot.querySelectorAll(".vertex-label").forEach((t=>t.removeAttribute("transform")))}resetDemo(){this.resetTriangle(),this.currentElement="1";const t=this.shadowRoot.getElementById("formula-display");t&&(t.innerHTML=`Result: <math><mrow>${i("1")}<mo>=</mo>${i("1")}</mrow></math>`)}updateFormulaDisplay(t,e,o){const n=this.shadowRoot.getElementById("formula-display");n&&(n.innerHTML=`Result: <math><mrow>${i(t)}<mo>&#x22C5;</mo>${i(e)}<mo>=</mo>${i(o)}</mrow></math>`)}getCurrentRotation(){const t=(this.shadowRoot.getElementById("triangle-group").getAttribute("transform")||"").match(/rotate\(([-\d.]+)/);return t?parseFloat(t[1]):0}getCurrentScale(){const t=(this.shadowRoot.getElementById("triangle-group").getAttribute("transform")||"").match(/scale\(([-\d.]+)/);return t?parseFloat(t[1]):1}animateRotation(t,e=500){const o=this.shadowRoot.getElementById("triangle-group");if(!o)return;let n=null;const i=this.getCurrentRotation(),r=i+t,a=this.getCurrentScale(),s=t=>{n||(n=t);const l=t-n,c=Math.min(l/e,1),u=i+c*(r-i);if(o.setAttribute("transform",`rotate(${u}) scale(${a}, 1)`),c<1)requestAnimationFrame(s);else{this.shadowRoot.querySelectorAll(".vertex-label").forEach((t=>{const e=t.getAttribute("x"),o=t.getAttribute("y");t.setAttribute("transform",`rotate(-${r}, ${e}, ${o})`)}))}};requestAnimationFrame(s)}animateFlip(t=500){const e=this.shadowRoot.getElementById("triangle-group");if(!e)return;let o=null;const n=this.getCurrentRotation(),i=r=>{o||(o=r);const a=r-o,s=Math.min(a/t,1),l=1+-2*s;if(e.setAttribute("transform",`rotate(${n}) translate(0, 100) scale(${l},1) translate(0, -100)`),s<1)requestAnimationFrame(i);else{this.shadowRoot.querySelectorAll(".vertex-label").forEach((t=>{const e=t.getAttribute("x"),o=t.getAttribute("y");t.setAttribute("transform",`translate(${e}, ${o}) scale(-1,1) translate(${-e}, ${-o})`)}))}};requestAnimationFrame(i)}animateFlipThenRotation(t,e=500,o=500){const n=this.shadowRoot.getElementById("triangle-group");if(!n)return;const i=this.getCurrentRotation();let r=null;const a=t=>{r||(r=t);const o=t-r,l=Math.min(o/e,1),c=1+-2*l;if(n.setAttribute("transform",`rotate(${i}) translate(0, 100) scale(${c},1) translate(0, -100)`),l<1)requestAnimationFrame(a);else{this.shadowRoot.querySelectorAll(".vertex-label").forEach((t=>{const e=t.getAttribute("x"),o=t.getAttribute("y");t.setAttribute("transform",`translate(${e}, ${o}) scale(-1,1) translate(${-e}, ${-o})`)})),s()}},s=()=>{let e=null;const r=i+t,a=t=>{e||(e=t);const s=t-e,l=Math.min(s/o,1),c=i+l*(r-i);if(n.setAttribute("transform",`rotate(${c}) translate(0, 100) scale(-1,1) translate(0, -100)`),l<1)requestAnimationFrame(a);else{this.shadowRoot.querySelectorAll(".vertex-label").forEach((t=>{const e=t.getAttribute("x"),o=t.getAttribute("y");t.setAttribute("transform",`translate(${e}, ${o}) scale(-1,1) rotate(-${r}) translate(${-e}, ${-o})`)}))}};requestAnimationFrame(a)};requestAnimationFrame(a)}raiseTriangle(){const t=this.shadowRoot.getElementById("triangle-group");if(t){const e=t.getAttribute("transform")||"";t.animate([{transform:e},{transform:e+" scale(1.2)"}],{duration:150,fill:"forwards",easing:"ease-out"})}}lowerTriangle(){const t=this.shadowRoot.getElementById("triangle-group");if(t){const e=t.getAttribute("transform")||"";t.animate([{transform:e},{transform:e.replace(/scale\([^)]*\)/,"scale(1)")}],{duration:150,fill:"forwards",easing:"ease-out"})}}setupInteractive(){this.shadowRoot.getElementById("check-closure").addEventListener("click",(()=>{const t=this.shadowRoot.getElementById("closure-a").value,e=this.shadowRoot.getElementById("closure-b").value,o=n(t,e);this.shadowRoot.getElementById("closure-result").innerHTML=`Result: <math><mrow>${i(t)}<mo>&#x22C5;</mo>${i(e)}<mo>=</mo>${i(o)}</mrow></math>. Closure holds because the result is in D₃.`})),this.shadowRoot.getElementById("check-identity-prop").addEventListener("click",(()=>{const t=this.shadowRoot.getElementById("identity-element").value,e=n("1",t);this.shadowRoot.getElementById("identity-result-prop").innerHTML=`Result: <math><mrow>${i("1")}<mo>&#x22C5;</mo>${i(t)}<mo>=</mo>${i(e)}</mrow></math>. The identity element is 1.`})),this.shadowRoot.getElementById("check-associativity-prop").addEventListener("click",(()=>{const t=this.shadowRoot.getElementById("assoc-a").value,e=this.shadowRoot.getElementById("assoc-b").value,o=this.shadowRoot.getElementById("assoc-c").value,r=n(n(t,e),o),a=n(t,n(e,o));let s=`Result: <math><mrow>( ${i(t)}<mo>&#x22C5;</mo>${i(e)} )<mo>&#x22C5;</mo>${i(o)}<mo>=</mo>${i(r)}</mrow></math> and <math><mrow>${i(t)}<mo>&#x22C5;</mo>( ${i(e)}<mo>&#x22C5;</mo>${i(o)} )<mo>=</mo>${i(a)}</mrow></math>. `;s+=r===a?"Associativity holds.":"Associativity fails!",this.shadowRoot.getElementById("associativity-result-prop").innerHTML=s})),this.shadowRoot.getElementById("check-inverse-prop").addEventListener("click",(()=>{const t=this.shadowRoot.getElementById("inverse-element").value,e=function(t){for(let e in o)if("1"===n(t,e))return e;return null}(t);n(t,e),this.shadowRoot.getElementById("inverse-result-prop").innerHTML=`Result: <math><mrow>${i(t)}<mo>&#x22C5;</mo>${i(e)}<mo>=</mo><mi>1</mi></mrow></math> Inverse holds.`}))}render(){const o=e`
       <style>
         :host {
           display: block;
@@ -33,9 +33,10 @@ import{B as t,x as e}from"./lit-element-d0893540.js";const o={1:{k:0,d:0},r:{k:1
         button:hover {
           background-color: #0056b3;
         }
-        .math {
+        #formula-display {
           text-align: center;
-          margin-top: 10px;
+          font-size: 24px;
+          margin-bottom: 20px;
         }
         section {
           background: #fff;
@@ -66,6 +67,9 @@ import{B as t,x as e}from"./lit-element-d0893540.js";const o={1:{k:0,d:0},r:{k:1
       </style>
       <h1>Triangle Group Demonstration (Dihedral Group D₃)</h1>
       
+      <!-- Formula display: will be reset to identity on load -->
+      <div id="formula-display"></div>
+      
       <!-- Animated triangle with transformation buttons -->
       <svg id="triangle-svg" width="300" height="300" viewBox="-150 -150 300 300">
         <g id="triangle-group">
@@ -78,36 +82,52 @@ import{B as t,x as e}from"./lit-element-d0893540.js";const o={1:{k:0,d:0},r:{k:1
       </svg>
       
       <div class="buttons">
+        <!-- Identity button: New element = 1 · (current) -->
         <button id="identity-button"
-          @pointerdown="${()=>{this.resetTriangle(),this.raiseTriangle()}}"
-          @pointerup="${()=>this.lowerTriangle()}"
-          @pointercancel="${()=>this.lowerTriangle()}">
+          @pointerdown="${()=>this.raiseTriangle()}"
+          @pointerup="${()=>{const t=n("1",this.currentElement);this.updateFormulaDisplay("1",this.currentElement,t),this.currentElement=t,this.lowerTriangle()}}"
+          @pointercancel="${()=>{}}">
           1 (Identity)
         </button>
-        <button @pointerdown="${()=>this.resetTriangle()}" 
-                @pointerup="${()=>this.animateRotation(120,500)}" 
-                @pointercancel="${()=>this.animateRotation(120,500)}">
+        <!-- Rotation by 120°: New element = r · (current) -->
+        <button 
+          @pointerdown="${()=>{}}"
+          @pointerup="${()=>{const t=n("r",this.currentElement);this.updateFormulaDisplay("r",this.currentElement,t),this.currentElement=t,this.animateRotation(120,500)}}"
+          @pointercancel="${()=>this.animateRotation(120,500)}">
           r (Rotate 120°)
         </button>
-        <button @pointerdown="${()=>this.resetTriangle()}" 
-                @pointerup="${()=>this.animateRotation(240,1e3)}" 
-                @pointercancel="${()=>this.animateRotation(240,1e3)}">
+        <!-- Rotation by 240° (r²): New element = r² · (current) -->
+        <button 
+          @pointerdown="${()=>{}}"
+          @pointerup="${()=>{const t=n("r2",this.currentElement);this.updateFormulaDisplay("r2",this.currentElement,t),this.currentElement=t,this.animateRotation(240,1e3)}}"
+          @pointercancel="${()=>this.animateRotation(240,1e3)}">
           r² (Rotate 240°)
         </button>
-        <button @pointerdown="${()=>this.resetTriangle()}" 
-                @pointerup="${()=>this.animateFlip(500)}" 
-                @pointercancel="${()=>this.animateFlip(500)}">
+        <!-- Reflection: New element = f · (current) -->
+        <button 
+          @pointerdown="${()=>{}}"
+          @pointerup="${()=>{const t=n("f",this.currentElement);this.updateFormulaDisplay("f",this.currentElement,t),this.currentElement=t,this.animateFlip(500)}}"
+          @pointercancel="${()=>this.animateFlip(500)}">
           f (Reflect)
         </button>
-        <button @pointerdown="${()=>this.resetTriangle()}" 
-                @pointerup="${()=>this.animateFlipThenRotation(120,500,500)}" 
-                @pointercancel="${()=>this.animateFlipThenRotation(120,500,500)}">
+        <!-- Reflection then rotation (r · f): New element = (r·f) · (current) -->
+        <button 
+          @pointerdown="${()=>{}}"
+          @pointerup="${()=>{const t=n("rf",this.currentElement);this.updateFormulaDisplay("rf",this.currentElement,t),this.currentElement=t,this.animateFlipThenRotation(120,500,500)}}"
+          @pointercancel="${()=>this.animateFlipThenRotation(120,500,500)}">
           r·f
         </button>
-        <button @pointerdown="${()=>this.resetTriangle()}" 
-                @pointerup="${()=>this.animateFlipThenRotation(240,500,1e3)}" 
-                @pointercancel="${()=>this.animateFlipThenRotation(240,500,1e3)}">
+        <!-- Reflection then rotation (r² · f): New element = (r²·f) · (current) -->
+        <button 
+          @pointerdown="${()=>{}}"
+          @pointerup="${()=>{const t=n("r2f",this.currentElement);this.updateFormulaDisplay("r2f",this.currentElement,t),this.currentElement=t,this.animateFlipThenRotation(240,500,1e3)}}"
+          @pointercancel="${()=>this.animateFlipThenRotation(240,500,1e3)}">
           r²·f
+        </button>
+        <!-- Explicit Reset Button -->
+        <button id="reset-button"
+          @pointerup="${()=>this.resetDemo()}">
+          Reset
         </button>
       </div>
       
