@@ -73,7 +73,7 @@ class TriangleGroupDemo extends HTMLElement {
   
   connectedCallback() {
     this.render();
-    // Set up interactive group property demonstrations.
+    this.resetDemo(); // Reset the demo (and formula-display) on load.
     this.setupInteractive();
   }
   
@@ -409,10 +409,8 @@ class TriangleGroupDemo extends HTMLElement {
       </style>
       <h1>Triangle Group Demonstration (Dihedral Group D₃)</h1>
       
-      <!-- Formula display: shows the “current multiplication” -->
-      <div id="formula-display">
-        Result: <math><mrow>${displayD3("1")}<mo>=</mo>${displayD3("1")}</mrow></math>
-      </div>
+      <!-- Formula display: will be reset to identity on load -->
+      <div id="formula-display"></div>
       
       <!-- Animated triangle with transformation buttons -->
       <svg id="triangle-svg" width="300" height="300" viewBox="-150 -150 300 300">
